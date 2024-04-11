@@ -10,7 +10,7 @@ import math
 
 #========TO DO: DECLARE THE SERVO ========
 
-
+px=Picarx()
 
 #================================================
 
@@ -19,14 +19,15 @@ import math
 #========TO DO========
 # define the initial and the next angle
 # amount of rotation (theta) = next angle - initial angle
-init_angle = #========SET A VALUE========
-next_angle = #========SET A VALUE========
+init_angle = 10
+next_angle = -10
+theta = next_angle - init_angle
 #================================================
 
 
 # The different ArUco dictionaries built into the OpenCV library. 
-aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_250)
-aruco_params = cv2.aruco.DetectorParameters_create()
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_250)
+aruco_params = cv2.aruco.DetectorParameters()
 
 # Side length of the ArUco marker in meters 
 marker_length = 0.1
@@ -38,10 +39,10 @@ with open(r'calib_data.yaml') as file:
 mtx = np.asarray(calib_data["camera_matrix"])
 dist = np.asarray(calib_data["distortion_coefficients"])
 
-cap = cv2.VideoCapture(cv2.CAP_V4L)
+cap = cv2.VideoCapture(cv2.CAP_V4L2)
 
 #======== TO DO ========
-# move the camera to the initial angle  
+px.set_cam_pan_angle(init_angle)
 
 time.sleep(3)
 #================================================
@@ -56,7 +57,7 @@ while cap.isOpened():
         if len(corners)!=0: # if aruco marker detected
             rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_length, mtx, dist)
             cv2.aruco.drawDetectedMarkers(frame, corners, ids, (0,255,0))
-            cv2.aruco.drawAxis(frame, mtx, dist, rvec, tvec, 0.05)
+            cv2.drawFrameAxes(frame, mtx, dist, rvec, tvec, 0.05)
         cv2.imshow("aruco", frame)
         key = cv2.waitKey(2) & 0xFF
         if key == ord('q'):
@@ -70,7 +71,7 @@ while cap.isOpened():
             #======== TO DO ========
             #Change the servo angle (you can use the value next_angle)
 
-            
+            px.set_cam_pan_angle(next_angle)
             #================================================
             time.sleep(3)
             print("Camera position changed, press r to save current data or q to quit...")
@@ -91,7 +92,7 @@ if init_rvec.all() and next_rvec.all():
     gth = utils.cvdata2transmtx(next_rvec,next_tvec)[0] 
     # ======== TO DO ========
     #find exp^(hat(xi)*th) using g(0) and g(th)
-    exp_mtx = 
+    exp_mtx = np.dot(gth, np.linalg.inv(g0))
     #================================================
     # The twist coordinate and screw motion of the servo
     v,w,th = utils.transmtx2twist(exp_mtx)
