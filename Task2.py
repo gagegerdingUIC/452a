@@ -12,8 +12,9 @@ import time
 
 
 #======== TO DO ========
+mindist= .1
 px = Picarx()
-turnTime = .15
+turnTime = 4
 speed =10
 
 # define a list of functions that allows the robot to 
@@ -59,6 +60,11 @@ cap = cv2.VideoCapture(cv2.CAP_V4L)
 
 print("Start running task 2...")
 
+px.set_cam_pan_angle(-30)
+time.sleep(1)
+px.set_cam_pan_angle(0)
+time.sleep(1)
+
 # The width and height of the rectangle track
 width = 0.8
 height = 0.3
@@ -71,12 +77,15 @@ while cap.isOpened():
     ret, frame = cap.read()
     if ret:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
         corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=aruco_params)
+        cv2.aruco.drawDetectedMarkers(frame,corners,ids,(0,225,0))
         if len(corners)!=0: # if aruco marker detected
             rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_length, mtx, dist)
             g,_,p = utils.cvdata2transmtx(rvec,tvec)
             _,_,th = utils.transmtx2twist(g)
-            # cv2.aruco.drawAxis(frame, mtx, dist, rvec, tvec, 0.05)
+            cv2.imshow("aruco", frame)
+            cv2.drawFrameAxes(frame, mtx, dist, rvec, tvec, 0.05)
             if state_flag == 0 and count == ids:
                 
                 
@@ -93,13 +102,19 @@ while cap.isOpened():
                 
                 
             elif state_flag == 1 and count == ids:
-                print("I made it to the elif")
+                rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_length, mtx, dist)
+                g,_,p = utils.cvdata2transmtx(rvec,tvec)
                 xdiff = p[0] - goal_x
                 zdiff = p[2] - goal_z
-                cur_dist = utils.distance(xdiff, zdiff)
-                print(cur_dist)
-                while cur_dist > 1:  # Move forward until close to the goal point
-                    print("I made it to the While")
+                cur_dist = utils.distance(xdiff,zdiff)
+                while cur_dist > mindist:  # Move forward until close to the goal point
+                    rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_length, mtx, dist)
+                    g,_,p = utils.cvdata2transmtx(rvec,tvec)
+                    _,_,th = utils.transmtx2twist(g)
+                    xdiff = p[0] - goal_x
+                    zdiff = p[2] - goal_z
+                    cur_dist = utils.distance(xdiff,zdiff)
+                    print("Not close enough, curdist: ", cur_dist)
                     px.forward(speed)
                 else:  # Stop and rotate 90 degrees
                     print("I made it to the else")
@@ -109,10 +124,10 @@ while cap.isOpened():
                     state_flag = 0
                     rot_flag = 1
                     count += 1
-                
-                    
+    cv2.imshow('aruco',frame)
+
                 #=======================
-                '''
+'''
         else:
             # If marker is missed
             if rot_flag == 1:
@@ -122,7 +137,7 @@ while cap.isOpened():
                     px.forward(speed)
                 else:  # If robot's orientation indicates backward direction
                     px.forward(-speed)  
-                    '''
+'''
             #=======================
        
 #         cv2.imshow('aruco',frame)
