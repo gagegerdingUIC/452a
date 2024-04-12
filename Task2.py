@@ -21,19 +21,23 @@ speed =10
 #going forward/backward (or you can use the functions implemented in the examples)
 
 def turn_left(car,angle):
+    angle=np.abs(angle)
     car.forward(speed)
     car.set_dir_servo_angle((-angle)+20)
     time.sleep(turnTime)
     car.set_dir_servo_angle(0)
 
 def turn_right(car,angle):
+    angle=np.abs(angle)
     car.forward(speed)
     car.set_dir_servo_angle(angle-20)
     time.sleep(turnTime)
     car.set_dir_servo_angle(0)
 
 
-#=======================
+
+
+#===================
 
 
 
@@ -72,7 +76,7 @@ while cap.isOpened():
             rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_length, mtx, dist)
             g,_,p = utils.cvdata2transmtx(rvec,tvec)
             _,_,th = utils.transmtx2twist(g)
-            cv2.drawFrameAxes(frame, mtx, dist, rvec, tvec, 0.05)
+            # cv2.aruco.drawAxis(frame, mtx, dist, rvec, tvec, 0.05)
             if state_flag == 0 and count == ids:
                 
                 
@@ -89,13 +93,17 @@ while cap.isOpened():
                 
                 
             elif state_flag == 1 and count == ids:
+                print("I made it to the elif")
                 xdiff = p[0] - goal_x
                 zdiff = p[2] - goal_z
                 cur_dist = utils.distance(xdiff, zdiff)
-                if cur_dist > 0.1:  # Move forward until close to the goal point
+                print(cur_dist)
+                while cur_dist > 1:  # Move forward until close to the goal point
+                    print("I made it to the While")
                     px.forward(speed)
                 else:  # Stop and rotate 90 degrees
-                    px.stop()
+                    print("I made it to the else")
+                    px.forward(0)
                     time.sleep(1)
                     turn_left(px, 90)  # Rotate left by 90 degrees
                     state_flag = 0
@@ -104,6 +112,7 @@ while cap.isOpened():
                 
                     
                 #=======================
+                '''
         else:
             # If marker is missed
             if rot_flag == 1:
@@ -113,8 +122,9 @@ while cap.isOpened():
                     px.forward(speed)
                 else:  # If robot's orientation indicates backward direction
                     px.forward(-speed)  
+                    '''
             #=======================
-        time.sleep(1)
+       
 #         cv2.imshow('aruco',frame)
 #         key = cv2.waitKey(1500) & 0xFF
 #         if key == ord('q'):
@@ -124,4 +134,3 @@ while cap.isOpened():
 
 cap.release()
 cv2.destroyAllWindows()
-
