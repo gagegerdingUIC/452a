@@ -12,31 +12,39 @@ import time
 
 
 #======== TO DO ========
-mindist= .1
+mindist= .8
 px = Picarx()
-turnTime = 4
-speed =10
+turnTime = 1.5
+speed =2
 
 # define a list of functions that allows the robot to 
 #turn 90 degree
 #going forward/backward (or you can use the functions implemented in the examples)
 
 def turn_left(car,angle):
+    speed = 3
+    car.forward(0)
+    time.sleep(turnTime)
     angle=np.abs(angle)
     car.forward(speed)
-    car.set_dir_servo_angle((-angle)+20)
+    car.set_dir_servo_angle((-angle))
     time.sleep(turnTime)
     car.set_dir_servo_angle(0)
-
+    car.forward(0)
+    time.sleep(.5)
+    speed = 1
 def turn_right(car,angle):
+    speed = 3
+    car.forward(0)
+    time.sleep(turnTime)
     angle=np.abs(angle)
     car.forward(speed)
-    car.set_dir_servo_angle(angle-20)
+    car.set_dir_servo_angle((angle))
     time.sleep(turnTime)
     car.set_dir_servo_angle(0)
-
-
-
+    car.forward(0)
+    time.sleep(.5)
+    speed =1
 
 #===================
 
@@ -108,16 +116,17 @@ while cap.isOpened():
                 zdiff = p[2] - goal_z
                 cur_dist = utils.distance(xdiff,zdiff)
                 while cur_dist > mindist:  # Move forward until close to the goal point
+                    speed=1
+                    px.forward(speed)
                     rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_length, mtx, dist)
                     g,_,p = utils.cvdata2transmtx(rvec,tvec)
                     _,_,th = utils.transmtx2twist(g)
                     xdiff = p[0] - goal_x
                     zdiff = p[2] - goal_z
                     cur_dist = utils.distance(xdiff,zdiff)
-                    print("Not close enough, curdist: ", cur_dist)
-                    px.forward(speed)
+                    #print("Not close enough, curdist: ", cur_dist)
                 else:  # Stop and rotate 90 degrees
-                    print("I made it to the else")
+                    #print("Now i'm too close")
                     px.forward(0)
                     time.sleep(1)
                     turn_left(px, 90)  # Rotate left by 90 degrees
