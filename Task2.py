@@ -1,4 +1,5 @@
 from picarx import Picarx
+
 import time
 import cv2
 import numpy as np
@@ -11,10 +12,25 @@ import time
 
 
 #======== TO DO ========
+px = Picarx()
+turnTime = .15
+speed =10
+
 # define a list of functions that allows the robot to 
 #turn 90 degree
 #going forward/backward (or you can use the functions implemented in the examples)
 
+def turn_left(car,angle):
+    car.forward(speed)
+    car.set_dir_servo_angle((-angle)+20)
+    time.sleep(turnTime)
+    car.set_dir_servo_angle(0)
+
+def turn_right(car,angle):
+    car.forward(speed)
+    car.set_dir_servo_angle(angle-20)
+    time.sleep(turnTime)
+    car.set_dir_servo_angle(0)
 
 
 #=======================
@@ -22,8 +38,8 @@ import time
 
 
 # The different ArUco dictionaries built into the OpenCV library. 
-aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_250)
-aruco_params = cv2.aruco.DetectorParameters_create()
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_250)
+aruco_params = cv2.aruco.DetectorParameters()
 
 # Side length of the ArUco marker in meters 
 marker_length = 0.05
@@ -56,14 +72,15 @@ while cap.isOpened():
             rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_length, mtx, dist)
             g,_,p = utils.cvdata2transmtx(rvec,tvec)
             _,_,th = utils.transmtx2twist(g)
-            # cv2.aruco.drawAxis(frame, mtx, dist, rvec, tvec, 0.05)
+            cv2.drawFrameAxes(frame, mtx, dist, rvec, tvec, 0.05)
             if state_flag == 0 and count == ids:
                 
                 
                 #======== TO DO ========
                 #State 0. How should you set the goal points based on the moment when the robot 
                 #detects a marker?
-                
+                goal_x = p[0]
+                goal_z = p[2]
                 
                 state_flag = 1
                 rot_flag = 0
@@ -72,36 +89,30 @@ while cap.isOpened():
                 
                 
             elif state_flag == 1 and count == ids:
-                xdiff = p[0]-goal_x
-                zdiff = p[2]-goal_z
-                cur_dist = utils.distance(xdiff,zdiff)
-                
-                #======== TO DO ========
-                #State 1. How should the robot move based on the information above?
-                if cur_dist :
-                    
+                xdiff = p[0] - goal_x
+                zdiff = p[2] - goal_z
+                cur_dist = utils.distance(xdiff, zdiff)
+                if cur_dist > 0.1:  # Move forward until close to the goal point
+                    px.forward(speed)
+                else:  # Stop and rotate 90 degrees
+                    px.stop()
+                    time.sleep(1)
+                    turn_left(px, 90)  # Rotate left by 90 degrees
                     state_flag = 0
                     rot_flag = 1
                     count += 1
-                elif zdiff :
-                    
-                else:
                 
                     
                 #=======================
         else:
-            
-            
-            #======== TO DO ========
-            #How should the robot move when it misses the marker?
+            # If marker is missed
             if rot_flag == 1:
-                left(Ab) # or it could be right, depends on how you set turn90()
+                turn_left(px, 90)  # Rotate left by 90 degrees
             else:
-                if th :
-                    
-                else:
-            
-                    
+                if th > 0:  # If robot's orientation indicates forward direction
+                    px.forward(speed)
+                else:  # If robot's orientation indicates backward direction
+                    px.forward(-speed)  
             #=======================
         time.sleep(1)
 #         cv2.imshow('aruco',frame)
@@ -113,3 +124,4 @@ while cap.isOpened():
 
 cap.release()
 cv2.destroyAllWindows()
+
