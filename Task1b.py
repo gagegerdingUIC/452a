@@ -8,7 +8,7 @@ import math
 
 #========TO DO: DECLARE THE SERVO ========
 
-
+px=Picarx()
 
 #==========================================
 
@@ -16,8 +16,8 @@ import math
 #========TO DO========
 # define the initial and the next angle
 # amount of rotation (theta) = next angle - initial angle
-init_angle = #========SET A VALUE========
-next_angle = #========SET A VALUE========
+init_angle = 10
+next_angle = -10
 #================================================
 
 
@@ -44,7 +44,7 @@ cap = cv2.VideoCapture(cv2.CAP_V4L)
 
 #======== TO DO ========
 # move the camera to the initial angle  
-
+px.set_cam_pan_angle(init_angle)
 time.sleep(3)
 #================================================
 
@@ -57,7 +57,7 @@ print("Start scanning the marker, you may quit the program by pressing q ...")
 for current_angle in range(init_angle,181,2):
     #======== TO DO ========
     # move the camera to current_angle
-    
+    px.set_cam_pan_angle(current_angle)
     
     #================================================
     
@@ -80,7 +80,7 @@ for current_angle in range(init_angle,181,2):
                 
                 #======== TO DO ========
                 #find exp^(hat(xi)*th) using g(0) and g(th)
-                exp_mtx = 
+                exp_mtx = np.dot(gth, np.linalg.inv(g0))
                 #================================================
                 
                 
@@ -92,7 +92,7 @@ for current_angle in range(init_angle,181,2):
                     actual_rot_angle = current_angle-init_angle
                     break
     cv2.imshow('aruco',frame)
-    cv2.waitKey(3000) # program halts for 3 seconds
+    cv2.waitKey(300) # program halts for 3 seconds
                 
 print("Finished rotation...")
 print("Estimated rotation angle: {} degrees".format(math.degrees(th)))

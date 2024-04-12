@@ -96,7 +96,9 @@ if init_rvec.all() and next_rvec.all():
     #================================================
     # The twist coordinate and screw motion of the servo
     v,w,th = utils.transmtx2twist(exp_mtx)
+    print(v," ",w," ",th)
     q,h,u,M = utils.twist2screw(v,w,th)
+    print(q," ",h," ",u," ",M)
     print("Estimated rotation angle: {} degrees".format(math.degrees(th)))
-    print("Twist Coordinates:\n {}".format(np.vstack((v,w))*th))
+    print("Twist Coordinates:\n {}".format(np.column_stack((v*th,w*th))))
     print("Screw motion:\n q:{},\n h:{},\n u:{},\n M:{}".format(q,h,u,M))
