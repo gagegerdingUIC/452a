@@ -116,8 +116,6 @@ while cap.isOpened():
                 zdiff = p[2] - goal_z
                 cur_dist = utils.distance(xdiff,zdiff)
                 while cur_dist > mindist:  # Move forward until close to the goal point
-                    speed=1
-                    px.forward(speed)
                     rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_length, mtx, dist)
                     g,_,p = utils.cvdata2transmtx(rvec,tvec)
                     _,_,th = utils.transmtx2twist(g)

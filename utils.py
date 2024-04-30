@@ -1,61 +1,41 @@
-import cv2 as cv2
+import cv2
 import numpy as np
 import math
-import matplotlib as plt
-
-
-# ======== TO DO ========
-# Fill out each function based on the lecture materials.
 
 def vec2hat(x):
-    # Function to create the skew-symmetric matrix (x^) from a vector x
-    x_hat = np.array([[0, -x[2], x[1]],
-                      [x[2], 0, -x[0]],
-                      [-x[1], x[0], 0]],dtype=object,)
-    return x_hat
+    return np.array([[  0,     -x[2][0],   x[1][0]],
+                     [ x[2][0],     0,     -x[0][0]],
+                     [-x[1][0],  x[0][0],   0]])
 
-def cvdata2transmtx(rvec, tvec):
-    
-    # Function to compute the homogeneous transformation matrix from camera to ArUco
-    R_aruco, _ = cv2.Rodrigues(rvec)  # Convert rotation vector to rotation matrix
-    p_aruco = tvec.reshape((3, 1))
-    
-    # Find the rotation and translation from ArUco to camera (inverse transformation)
-    R_camera = R_aruco.T  # Transpose of the rotation matrix
-    p_camera = -np.dot(R_camera, p_aruco)
-    
-    # Homogeneous transformation matrix
-    g = np.eye(4)
-    g[:3, :3] = R_camera
-    g[:3, 3] = p_camera.flatten()
-    
-    return g, R_camera, p_camera
+def cvdata2transmtx(rvec,tvec):
+    R_temp = cv2.Rodrigues(rvec)[0]
+    p_temp = tvec.reshape(-1,1)
+    R = R_temp.T
+    p = -R.dot(p_temp)
+    g = np.vstack((np.hstack((R,p)), [0, 0, 0 ,1]))
+    return g, R, p
+
+def cvdata2transmtx2(rvec,tvec):
+    g_marker_to_camera, _, _ = cvdata2transmtx(rvec, tvec)
+    g_camera_to_marker = np.linalg.inv(g_marker_to_camera) #invert cvdata2transmtx 
+    return g_camera_to_marker
 
 def transmtx2twist(g):
-    # Function to compute the twist coordinates from the homogeneous transformation matrix
-    R = g[:3, :3]
-    p = g[:3, 3].reshape((3, 1))
-    
-    # Convert the rotation matrix to rotation vector (including theta)
-    rvec, _ = cv2.Rodrigues(R)
-    
-    # Find the twist coordinate
-    th = np.linalg.norm(rvec)
-    w = rvec / th
-    v = np.dot(-vec2hat(w), p).flatten()
-    
+    R = g[0:3,0:3]
+    p = g[0:3,3]
+    rot_exp_coord = cv2.Rodrigues(R)[0]
+    th = np.linalg.norm(rot_exp_coord)
+    w = rot_exp_coord/th
+    v = np.linalg.inv((np.identity(3)-R).dot(vec2hat(w))+w.dot(w.T)*th).dot(p).reshape(-1,1)
     return v, w, th
 
-def twist2screw(v, w, th):
-    # Function to compute the screw motion from the twist coordinate
-    q = np.cross(v, w,axis=0) # Point on screw axis
-    h = np.linalg.norm(v) # Pitch
-    u = w / np.linalg.norm(w) # Normalized w
-    M = th # Magnitude
-
+def twist2screw(v,w,th):
+    q = np.cross(w.reshape(-1),v.reshape(-1)).reshape(-1,1)
+    h = w.T.dot(v)
+    u = w
+    M = th
     return q, h, u, M
 
-def distance(xdiff, zdiff):
-    # Function to compute the distance using delta(x) and delta(z) in the x-z plane
+def distance(xdiff,zdiff):
     dist = math.sqrt(xdiff**2 + zdiff**2)
     return dist
