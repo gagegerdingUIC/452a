@@ -198,12 +198,12 @@ def go_to_goal(px, cap, goal_id, goal, hit, deg_eps, dist_eps, last_proportional
                     cv2.drawFrameAxes(frame, mtx, dist, rvecs[minId], tvecs[minId], 0.05)
                     g_gc = loc_to_goal(1,utils.cvdata2transmtx(rvecs[minId], tvecs[minId])[0])[0]
                     p_gc = loc_to_goal(1,utils.cvdata2transmtx(rvecs[minId], tvecs[minId])[0])[2]
-                    th = utils.transmtx2twist(g_gc)[2]
+                    th = utils.transmtx2twist(g_gc)[1]
                     if angle_to_goal is None:
                         goal.z = 0.1
                                 # This is the angle between the robot's initial position to the Goal marker frame's origin
                                 # The goal point will be set along this line near to the Goal marker
-                        angle_to_goal = th
+                        angle_to_goal = math.atan(p_gc[0] / p_gc[2])
                         goal.x = goal.z * math.tan(angle_to_goal)
                         print("Set Goal Point x:{} z:{}".format(goal.x, goal.z))
                     xdiff = p_gc[0] - goal.x
@@ -229,13 +229,13 @@ def go_to_goal(px, cap, goal_id, goal, hit, deg_eps, dist_eps, last_proportional
                         cv2.drawFrameAxes(frame, mtx, dist, rvecs[i], tvecs[i], 0.05)
                         g_gc = utils.cvdata2transmtx(rvecs[i], tvecs[i])[0]
                         p_gc = g_gc[:, 3]
-                        th = utils.transmtx2twist(g_gc)[2]
+                        th = utils.transmtx2twist(g_gc)[1]
                         print("goal_id theta ",th)
                         if angle_to_goal is None:
                             goal.z = 0.1
                             # This is the angle between the robot's initial position to the Goal marker frame's origin
                             # The goal point will be set along this line near to the Goal marker
-                            angle_to_goal = th
+                            angle_to_goal = math.atan(p_gc[0] / p_gc[2])
                             goal.x = goal.z * math.tan(angle_to_goal)
                             print("Set Goal Point x:{} z:{}".format(goal.x, goal.z))
                         xdiff = p_gc[0] - goal.x
@@ -271,7 +271,7 @@ def go_to_goal(px, cap, goal_id, goal, hit, deg_eps, dist_eps, last_proportional
                         cv2.drawFrameAxes(frame, mtx, dist, rvecs[i], tvecs[i], 0.05)
                         g_gc = loc_to_goal(ids[i],utils.cvdata2transmtx(rvecs[i],tvecs[i])[0])[0]
                         p_gc = loc_to_goal(ids[i],utils.cvdata2transmtx(rvecs[i],tvecs[i])[0])[1]
-                        th = utils.transmtx2twist(g_gc)[2]
+                        th = utils.transmtx2twist(g_gc)[1]
                         print(ids[i], " theta")
                         if angle_to_goal is None:
                             goal.z = 0.1
