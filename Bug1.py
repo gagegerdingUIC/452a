@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 20 20:19:34 2023
-
-@author: Leonardo
-"""
-
 import RPi.GPIO as GPIO
 import cv2
 import numpy as np
@@ -106,7 +99,7 @@ def readLine(white_line = 0):
 	
 	coef1=1000
 	treshold1=1300
-	treshold2=450
+	treshold2=350
 
 
 	for i in range(0,numSensors):
@@ -127,12 +120,12 @@ def readLine(white_line = 0):
 	if(on_line != 1):
 		# If it last read to the left of center, return 0.
 		if(last_value < (numSensors - 1)*coef1/2):
-		#print("left")
+            print("left")
 		    return 0;
 
 		# If it last read to the right of center, return the max.
 		else:
-		#print("right")
+            print("right")
 		    return (numSensors - 1)*coef1
 	
 	last_value = avg/sum
@@ -175,7 +168,7 @@ def go_to_goal(px,cap,goal_id,goal,hit,deg_eps,dist_eps,last_proportional,angle_
             
             #======= TO DO =======: the robots needs to turn, therefore call here the function implemented before
             
-            
+            turn_left
             return state, goal, hit, last_proportional, angle_to_goal
         
         

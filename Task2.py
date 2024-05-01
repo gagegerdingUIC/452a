@@ -94,7 +94,8 @@ while cap.isOpened():
             _,_,th = utils.transmtx2twist(g)
             cv2.imshow("aruco", frame)
             cv2.drawFrameAxes(frame, mtx, dist, rvec, tvec, 0.05)
-            if state_flag == 0 and count == ids:
+                if p[0] or p[2]
+                    
                 
                 
                 #======== TO DO ========

@@ -17,7 +17,7 @@ def cvdata2transmtx(rvec,tvec):
 
 def cvdata2transmtx2(rvec,tvec):
     g_marker_to_camera, _, _ = cvdata2transmtx(rvec, tvec)
-    g_camera_to_marker = np.linalg.inv(g_marker_to_camera) #invert cvdata2transmtx 
+    g_camera_to_marker = np.linalg.inv(g_marker_to_camera) #invert cvdata2transmtx
     return g_camera_to_marker
 
 def transmtx2twist(g):
