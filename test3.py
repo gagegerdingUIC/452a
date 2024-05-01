@@ -295,9 +295,9 @@ def find_leave(px, cap, goal_id, helper1_id, helper2_id, goal, hit, leave, dist_
                     # ======= TO DO =======:: Please fill out when other markers are detected.
                     #       The code is very similar to above where the Goal marker is detected.
                     elif ids[i] == helper1_id:
-                        g_gc1 = utils.cvdata2transmtx2(rvecs[i], tvecs[i])[0]
+                        g_gc1 = utils.cvdata2transmtx2(rvecs[i], tvecs[i])
                     elif ids[i] == helper2_id:
-                        g_gc2 = utils.cvdata2transmtx2(rvecs[i], tvecs[i])[0]
+                        g_gc2 = utils.cvdata2transmtx2(rvecs[i], tvecs[i])
 
             cv2.imshow('aruco', frame)
             key = cv2.waitKey(100) & 0xFF
