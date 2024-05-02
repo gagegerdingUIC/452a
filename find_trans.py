@@ -131,6 +131,10 @@ g_gh3 = g_h2h3 @ g_gh2
 g_gh4 = g_h3h4 @ g_gh3
 
 
+print("Goal to Helper 1: \n", g_gh1)
+print("Goal to Helper 2: \n", g_gh2)
+print("Goal to Helper 3: \n", g_gh3)
+print("Goal to Helper 4: \n", g_gh4)
 
 
 calib_data = {
